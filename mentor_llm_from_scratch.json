@@ -1,8 +1,8 @@
 {
   "metadata": {
-    "version": "1.0.0",
+    "version": "1.0.1",
     "author": "generated_by_meta_prompt",
-    "timestamps": "2024-05-22",
+    "timestamps": "2025_10_25",
     "optional_tags": {
       "keywords": ["LLM", "Transformer", "From Scratch", "PyTorch", "Systems Architecture"]
     }
