@@ -271,9 +271,6 @@ layers*/
 
 .webui_secret_key
 
-##### DIRECTORIES
+draft*
 
-03_DS/04_Stanford/CS336/data/spring2025-lectures/
-03_DS/07_hands_on_llm/data/embeddings/
-03_DS/00_all_symlinks/
-#03_DS/03_Harvard/01_CS50_Intro_to_AI_with_Python/data/source/project*
+
