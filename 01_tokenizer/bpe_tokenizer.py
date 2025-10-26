@@ -9,10 +9,6 @@ def main():
     my_tokenizer = BPETokenizer()
     my_tokenizer.train(text)
 
-    # print(my_tokenizer.vocab)
-    # print(my_tokenizer.reverse_vocab)
-    # print(my_tokenizer._tokenize_text(text)[0])
-
 
 class BPETokenizer:
     """BPETokenizer class definition."""
@@ -71,6 +67,39 @@ class BPETokenizer:
 
         return max_count, count_pairs_dict
 
+    def _merge_pair(self, tokenized_text, merge_pair):
+        # update tokenized text
+        for i in range(len(tokenized_text)):
+            line = tokenized_text[i]
+            # print("1", tokenized_text[i])
+
+            # updated list of tokens
+            updated_line = list()
+
+            # len line - 2 for staying within range
+            len_line = len(line) - 2
+
+            # keep empty lines as is
+            if len_line == 0:
+                updated_line.append(line)
+                continue
+
+            # find paired token's position and populate new line
+            idx = 0
+            while idx <= len_line:
+                if (line[idx], line[idx + 1]) == merge_pair:
+                    updated_line.append(self.merges[merge_pair])
+                    idx += 1
+                else:
+                    updated_line.append(line[idx])
+                idx += 1
+            tokenized_text[i] = updated_line
+            # print("2", tokenized_text[i])
+
+        print(tokenized_text[6])
+
+        return tokenized_text
+
     def train(self, text):
         """Convert text to initial tokens."""
         self._initialize_vocab(text)
@@ -85,17 +114,12 @@ class BPETokenizer:
             if count == max_count:
                 popular_pairs.append(pair)
 
-        # print(max_count)
-        # print(count_pairs_dict)
-        # print(popular_pairs)
-
         # for pair in popular_pairs:
         #    print(self.reverse_vocab[pair[0]], self.reverse_vocab[pair[1]])
 
-        self.merges[min(popular_pairs)] = self.next_id
+        merge_pair = min(popular_pairs)
+        self.merges[merge_pair] = self.next_id
         self.next_id += 1
-
-        print(self.merges)
 
 
 if __name__ == "__main__":
