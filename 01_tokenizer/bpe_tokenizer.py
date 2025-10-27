@@ -7,7 +7,7 @@ def main():
     dataset_path = "../data/shakespeare_dataset"
 
     my_tokenizer = BPETokenizer()
-    my_tokenizer.train(dataset_path)
+    my_tokenizer.train(dataset_path, vocab_size=200)
 
 
 class BPETokenizer:
@@ -68,37 +68,53 @@ class BPETokenizer:
 
         return max_count, count_pairs_dict
 
-    def _get_candidate_pair(self, max_count, count_pairs_dict):
+    def _get_merge_candidate(self, max_count, count_pairs_dict):
         """Find a new pair for merge."""
         # find most frequent pairs
         popular_pairs = list()
         for pair, count in count_pairs_dict.items():
-            # print(f"{self.reverse_vocab[pair[0]]}{self.reverse_vocab[pair[1]]}")
             # append popular_pairs list
             if count == max_count:
                 popular_pairs.append(pair)
 
-        candidate_pair = min(popular_pairs)
+        merge_candidate = min(popular_pairs)
 
-        return candidate_pair
+        return merge_candidate
 
-    def _update_vocab(self, candidate_pair):
+    def _update_vocab(self, merge_candidate):
         """
         Update both vocab and reverse_vocab.
 
         Return: new_pair_id: str
         """
+        # convert merge_candidate into char pair
+        new_pair_id = f"{self.reverse_vocab[merge_candidate[0]]}{self.reverse_vocab[merge_candidate[1]]}"
+
         # update vocab with new id-token pair
-        new_pair_id = f"{self.reverse_vocab[candidate_pair[0]]}{self.reverse_vocab[candidate_pair[1]]}"
         self.vocab[new_pair_id] = self.next_token
         self.reverse_vocab[self.next_token] = new_pair_id
 
         self.next_token += 1
 
-    def _merge_pair(self, tokenized_dataset, pair_id):
-        """Update tokenized_dataset with the merged pair."""
+        return new_pair_id
+
+    def _update_tokenized_dataset(
+        self, tokenized_dataset: list, merge_candidate: tuple, pair_id: str
+    ):
+        """
+        Update tokenized_dataset with the merged pair.
+
+        Parameters
+        ----------
+        tokenized_dataset : list
+            A list of tokenized texts.
+        merge_candidate : tuple
+            A pair of tokens to be merged.
+        pair_id : str
+            A pair of characters from self.vocab.
+
+        """
         # update dataset
-        check_max_count = 0
         for i in range(len(tokenized_dataset)):
             # original tokenized text
             text = tokenized_dataset[i]
@@ -109,10 +125,9 @@ class BPETokenizer:
             idx = 0
             # -2 because idx starts from 0 + we need idx+1
             while idx <= len(text) - 2:
-                if (text[idx], text[idx + 1]) == pair_id:
+                if (text[idx], text[idx + 1]) == merge_candidate:
                     updated_text.append(self.vocab[pair_id])
                     idx += 1
-                    check_max_count += 1
                 else:
                     updated_text.append(text[idx])
                 idx += 1
@@ -122,27 +137,33 @@ class BPETokenizer:
 
         return tokenized_dataset
 
-    def train(self, dataset: str):
+    def train(self, dataset: str, vocab_size: int):
         """Convert text to initial tokens."""
         dataset_path = Path(dataset)
 
         self._initialize_vocab(dataset_path)
+
         tokenized_dataset = self._tokenize_dataset(dataset_path)
 
-        # get pairs information
-        max_count, count_pairs_dict = self._count_pairs(tokenized_dataset)
+        iter_number = vocab_size - len(self.vocab)
+        for _ in range(iter_number):
+            # get pairs information
+            max_count, count_pairs_dict = self._count_pairs(tokenized_dataset)
 
-        # get new candidate pair
-        candidate_pair = self._get_candidate_pair(max_count, count_pairs_dict)
+            if max_count < 2:
+                print("No more pairs to merge available. Exiting...")
+                break
 
-        # update vocab
-        new_pair_id = self._update_vocab(candidate_pair)
+            # get new candidate pair
+            merge_candidate = self._get_merge_candidate(max_count, count_pairs_dict)
 
-        print(self.vocab)
-        print(self.reverse_vocab)
+            # update vocab
+            new_pair_id = self._update_vocab(merge_candidate)
 
-        # merge pair into a new token
-        self._merge_pair(tokenized_dataset, new_pair_id)
+            # merge pair into a new token
+            tokenized_dataset = self._update_tokenized_dataset(
+                tokenized_dataset, merge_candidate, new_pair_id
+            )
 
 
 if __name__ == "__main__":
