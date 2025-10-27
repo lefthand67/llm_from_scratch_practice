@@ -19,7 +19,7 @@ class BPETokenizer:
         self.vocab = dict()
         # decoding token -> id
         self.reverse_vocab = dict()
-        self.next_id = 0
+        self.next_token = 0
 
     def _initialize_vocab(self, dataset_path):
         """Initialize vocab with individual characters from entire dataset."""
@@ -31,7 +31,7 @@ class BPETokenizer:
         chars = sorted(chars)
         self.vocab = {char: i for i, char in enumerate(chars)}
         self.reverse_vocab = {i: char for char, i in self.vocab.items()}
-        self.next_id = len(self.vocab)
+        self.next_token = len(self.vocab)
 
     def _tokenize_dataset(self, dataset_path):
         """Tokenize entire database."""
@@ -80,19 +80,22 @@ class BPETokenizer:
 
         candidate_pair = min(popular_pairs)
 
-        print(f"candidate pair: {candidate_pair}")
-        print(f"max count: {max_count}")
-
         return candidate_pair
 
     def _update_vocab(self, candidate_pair):
+        """
+        Update both vocab and reverse_vocab.
+
+        Return: new_pair_id: str
+        """
         # update vocab with new id-token pair
-        self.vocab[candidate_pair] = self.next_id
-        self.reverse_vocab[self.next_id] = candidate_pair
+        new_pair_id = f"{self.reverse_vocab[candidate_pair[0]]}{self.reverse_vocab[candidate_pair[1]]}"
+        self.vocab[new_pair_id] = self.next_token
+        self.reverse_vocab[self.next_token] = new_pair_id
 
-        self.next_id += 1
+        self.next_token += 1
 
-    def _merge_pair(self, tokenized_dataset, candidate_pair):
+    def _merge_pair(self, tokenized_dataset, pair_id):
         """Update tokenized_dataset with the merged pair."""
         # update dataset
         check_max_count = 0
@@ -106,8 +109,8 @@ class BPETokenizer:
             idx = 0
             # -2 because idx starts from 0 + we need idx+1
             while idx <= len(text) - 2:
-                if (text[idx], text[idx + 1]) == candidate_pair:
-                    updated_text.append(self.vocab[candidate_pair])
+                if (text[idx], text[idx + 1]) == pair_id:
+                    updated_text.append(self.vocab[pair_id])
                     idx += 1
                     check_max_count += 1
                 else:
@@ -116,12 +119,6 @@ class BPETokenizer:
 
             # update text in dataset
             tokenized_dataset[i] = updated_text
-
-        # check
-        print(f"check_max_count: {check_max_count}")
-
-        print(self.vocab)
-        print(self.reverse_vocab)
 
         return tokenized_dataset
 
@@ -139,10 +136,13 @@ class BPETokenizer:
         candidate_pair = self._get_candidate_pair(max_count, count_pairs_dict)
 
         # update vocab
-        self._update_vocab(candidate_pair)
+        new_pair_id = self._update_vocab(candidate_pair)
+
+        print(self.vocab)
+        print(self.reverse_vocab)
 
         # merge pair into a new token
-        self._merge_pair(tokenized_dataset, candidate_pair)
+        self._merge_pair(tokenized_dataset, new_pair_id)
 
 
 if __name__ == "__main__":
