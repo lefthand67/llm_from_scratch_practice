@@ -7,7 +7,11 @@ def main():
     dataset_path = "../data/shakespeare_dataset"
 
     my_tokenizer = BPETokenizer()
-    my_tokenizer.train(dataset_path, vocab_size=200)
+    my_tokenizer.train(dataset_path, vocab_size=200, frequency_threshold=20)
+
+    print("Final vocabulary size:", len(my_tokenizer.vocab))
+    print("Vocabulary learned:")
+    print(my_tokenizer.vocab)
 
 
 class BPETokenizer:
@@ -29,9 +33,19 @@ class BPETokenizer:
                 chars.update(set(f.read()))
 
         chars = sorted(chars)
-        self.vocab = {char: i for i, char in enumerate(chars)}
+
+        # unkown, start, end special tokens
+        self.vocab = {"</unk>": 0, "<s>": 1, "</s>": 2}
         self.reverse_vocab = {i: char for char, i in self.vocab.items()}
+
+        # fix next_token
         self.next_token = len(self.vocab)
+
+        # populate vocabs with chars from dataset
+        for char in chars:
+            self.vocab[char] = self.next_token
+            self.reverse_vocab[self.next_token] = char
+            self.next_token += 1
 
     def _tokenize_dataset(self, dataset_path):
         """Tokenize entire database."""
@@ -137,8 +151,24 @@ class BPETokenizer:
 
         return tokenized_dataset
 
-    def train(self, dataset: str, vocab_size: int):
-        """Convert text to initial tokens."""
+    def train(self, dataset: str, vocab_size: int, frequency_threshold: int = 2):
+        """
+        Convert text to initial tokens.
+
+        The training will stop in one of two scenarios:
+        1. The vocab size is reached.
+        2. frequency_threshold is reached.
+
+        Parameters
+        ----------
+        dataset : str
+            path to dataset with text stored in regular files.
+        vocab_size : int
+            desired size of the final vocabulary.
+        frequency_threshold : int
+            safety measure to avoid rare frequencies to be added to vocab, not including.
+
+        """
         dataset_path = Path(dataset)
 
         self._initialize_vocab(dataset_path)
@@ -150,7 +180,7 @@ class BPETokenizer:
             # get pairs information
             max_count, count_pairs_dict = self._count_pairs(tokenized_dataset)
 
-            if max_count < 2:
+            if max_count < frequency_threshold:
                 print("No more pairs to merge available. Exiting...")
                 break
 
