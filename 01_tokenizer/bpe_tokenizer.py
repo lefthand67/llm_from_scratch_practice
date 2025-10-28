@@ -3,7 +3,7 @@ def main():
     dataset_path = "../data/shakespeare_dataset"
 
     my_tokenizer = BPETokenizer()
-    my_tokenizer.train(dataset_path, vocab_size=200, frequency_threshold=20)
+    my_tokenizer.train(dataset_path, vocab_size=2000, frequency_threshold=20)
 
     print("Final vocabulary size:", len(my_tokenizer.vocab))
 
@@ -12,6 +12,11 @@ def main():
 
     print("Merges:")
     print(my_tokenizer.merges)
+
+    string = "hello world"
+    result = my_tokenizer.encode(string)
+    print(f"Original string: {string}")
+    print(f"Tokenized string: {result}")
 
 
 class BPETokenizer:
@@ -150,7 +155,10 @@ class BPETokenizer:
             # find paired tokens' position and populate new text
             idx = 0
             # -2 because idx starts from 0 + we need idx+1
-            while idx <= len(text) - 2:
+            while idx < len(text):
+                if idx == len(text) - 1:
+                    updated_text.append(text[idx])
+                    break
                 if (text[idx], text[idx + 1]) == merge_candidate:
                     updated_text.append(merged_string)
                     idx += 1
@@ -211,6 +219,31 @@ class BPETokenizer:
             prepaired_dataset = self._update_prepaired_dataset(
                 prepaired_dataset, merge_candidate, merged_string
             )
+
+    def encode(self, text: str):
+        """Encode input string to token_ids."""
+        # prepare text as a list of chars
+        prepaired_text = list(text)
+
+        for i in range(len(self.merges)):
+            pair = self.merges[i]
+            updated_text = list()
+            idx = 0
+            while idx < len(prepaired_text):
+                if idx == len(prepaired_text) - 1:
+                    updated_text.append(prepaired_text[idx])
+                    break
+                elif pair == (prepaired_text[idx], prepaired_text[idx + 1]):
+                    updated_text.append(
+                        f"{prepaired_text[idx]}{prepaired_text[idx + 1]}"
+                    )
+                    idx += 1
+                else:
+                    updated_text.append(prepaired_text[idx])
+                idx += 1
+            prepaired_text = updated_text
+
+        return prepaired_text
 
 
 if __name__ == "__main__":
