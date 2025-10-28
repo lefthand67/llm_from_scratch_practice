@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "version": "1.1.0",
+    "version": "0.2.0",
     "author": "generated_by_meta_prompt", 
     "timestamps": "2025-28-10",
     "optional_tags": {
@@ -244,6 +244,20 @@
           "context": "Student implemented vocab updates but didn't record merge rules, making encoding of new text impossible",
           "lesson": "Always verify both training AND inference paths in implementations. Vocab alone is insufficient - merge history is essential for reproducibility.",
           "timestamp": "2025-10-28"
+        },
+        {
+          "error": "Recommended integer-based BPE training instead of standard string-based training",
+          "context": "Guided user to implement BPE using integer tokens throughout training process",
+          "correction": "Standard BPE (Hugging Face, SentencePiece, GPT, Llama) trains with strings/symbols for Unicode handling and portability. Integer optimization is for inference only. Training must use string merges to produce human-readable merge rules and handle arbitrary text.",
+          "lesson": "Distinguish between training correctness and inference optimization. Production systems prioritize correct string-based training first, then add integer optimizations for inference.",
+          "timestamp": "2025-10-28"
+        },
+        {
+          "error": "Failed to emphasize critical production system architecture principles",
+          "context": "Did not highlight the fundamental training vs inference phase separation in tokenizer design",
+          "correction": "Production tokenizers: 1) Train with strings for correctness and portability, 2) Compile to efficient integer-based inference, 3) Maintain human-readable merge rules (merges.txt)",
+          "lesson": "Always teach production architecture patterns from the start, not prototype shortcuts that break system correctness.",
+          "timestamp": "2025-10-28"
         }
       ]
     },
@@ -260,9 +274,12 @@
         ],
         "current_problems": {
           "problems": [
-            "Need to implement self.merges tracking for proper encoding",
+            "Need to implement correct string-based BPE training",
+            "Need to understand Unicode handling in production tokenizers",
+            "Need to design proper merge rule persistence (merges.txt format)",
             "Need to create encode() method for new text inference",
-            "Need to understand when to use <s> and </s> tokens practically"
+            "Need to understand when to use <s> and </s> tokens practically",
+            "String-based vs integer-based tokenizer architecture",
           ]
         },
         "learning_style_observed": {
@@ -270,8 +287,12 @@
             "Excellent systems thinking - identified architectural flaws",
             "Hands-on implementation preference", 
             "Analytical approach to vocabulary trade-offs",
-            "Proactive in catching teaching errors",
-            "Strong intuition for practical constraints"
+            "Strong intuition for practical constraints",
+            "Exceptional critical thinking - challenges mentor assumptions",
+            "Proactive peer consultation for validation",
+            "Strong production systems intuition",
+            "Architecture-first thinking",
+            "Identifies correctness vs optimization trade-offs naturally"
           ]
         },
         "session_metrics": [
@@ -282,7 +303,7 @@
             "key_insights": "Identified critical missing merges tracking"
           }
         ],
-        "next_focus": "Complete Phase 1: Fix self.merges implementation and create encode() method for new text inference. Then move to Phase 2: Transformer attention mechanism.",
+        "next_focus": "Phase 1: Rebuild BPE tokenizer using correct string-based training approach. Implement proper merge rule persistence and Unicode handling.",
         "environment_state": "Setup: Python, PyTorch, TensorFlow, Fedora 43, NVIDIA RTX 4090ti (16GB VRAM). BPE tokenizer implementation in progress.",
         "zero_level_protocol": "Start with fundamental concepts of information representation and processing, using analogies from signal processing and physics. Bridge the backpropagation gap with intuitive, step-by-step reasoning through computational graphs.",
         "external_resources_log": {
