@@ -13,16 +13,27 @@ def main():
     print("Merges:")
     print(my_tokenizer.merges)
 
-    string = "hello world"
-    result = my_tokenizer.encode(string)
+    string = "hello world привет"
+    result = my_tokenizer.tokenize(string)
     print(f"Original string: {string}")
     print(f"Tokenized string: {result}")
+
+    encoded_string = my_tokenizer.encode(result)
+    print("Encoded string:", encoded_string)
+
+    decoded_text = my_tokenizer.decode(encoded_string)
+    print("Decoded text:", decoded_text)
 
 
 class BPETokenizer:
     """BPETokenizer class definition."""
 
-    def __init__(self, special_tokens: tuple = ("</unk>", "<s>", "</s>")):
+    # special tokens
+    start_string = "<s>"
+    end_string = "</s>"
+    unknown = "</unk>"
+
+    def __init__(self, special_tokens: tuple = (start_string, end_string, unknown)):
         """Initialize the class entity."""
         self.special_tokens = special_tokens
         # token -> token_id
@@ -220,30 +231,58 @@ class BPETokenizer:
                 prepaired_dataset, merge_candidate, merged_string
             )
 
-    def encode(self, text: str):
+    def tokenize(self, text: str):
         """Encode input string to token_ids."""
         # prepare text as a list of chars
-        prepaired_text = list(text)
+        tokenized_text = list(text)
 
         for i in range(len(self.merges)):
             pair = self.merges[i]
             updated_text = list()
             idx = 0
-            while idx < len(prepaired_text):
-                if idx == len(prepaired_text) - 1:
-                    updated_text.append(prepaired_text[idx])
+            while idx < len(tokenized_text):
+                if idx == len(tokenized_text) - 1:
+                    updated_text.append(tokenized_text[idx])
                     break
-                elif pair == (prepaired_text[idx], prepaired_text[idx + 1]):
+                elif pair == (tokenized_text[idx], tokenized_text[idx + 1]):
                     updated_text.append(
-                        f"{prepaired_text[idx]}{prepaired_text[idx + 1]}"
+                        f"{tokenized_text[idx]}{tokenized_text[idx + 1]}"
                     )
                     idx += 1
                 else:
-                    updated_text.append(prepaired_text[idx])
+                    updated_text.append(tokenized_text[idx])
                 idx += 1
-            prepaired_text = updated_text
+            tokenized_text = updated_text
 
-        return prepaired_text
+        return tokenized_text
+
+    def encode(self, tokenized_text: list):
+        """Encode tokenized text."""
+        encoded_text = list()
+
+        # start string
+        encoded_text.append(self.vocab[self.start_string])
+
+        # encode tokens
+        for char_seq in tokenized_text:
+            try:
+                encoded_text.append(self.vocab[char_seq])
+            # unknown char
+            except Exception:
+                encoded_text.append(self.vocab[self.unknown])
+
+        # end string
+        encoded_text.append(self.vocab[self.end_string])
+        return encoded_text
+
+    def decode(self, encoded_text: list):
+        """Decode encoded text back to string."""
+        decoded_text = list()
+
+        for token_id in encoded_text:
+            decoded_text.append(self.reverse_vocab[token_id])
+
+        return "".join(decoded_text)
 
 
 if __name__ == "__main__":
