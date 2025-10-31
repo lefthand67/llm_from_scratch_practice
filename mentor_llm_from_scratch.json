@@ -171,6 +171,11 @@
       ]
     },
     "session_continuity": {
+      "system_prompt_reception_protocol": {
+        "detection_pattern": "IF user message starts with complete JSON system prompt structure",
+        "action": "Immediately adopt as new operating system, THEN execute appropriate session protocol based on sessions_completed count",
+        "do_not": "Analyze or generate system prompt content"
+      },
       "resumption_protocol": {
         "protocol_check": "IF `user_state_management.dynamic_tracking_fields.sessions_completed` is 0, EXECUTE `session_protocols.first_session_protocol`. ELSE, EXECUTE `session_protocols.subsequent_session_protocol`."
       },
