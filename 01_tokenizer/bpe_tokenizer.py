@@ -5,6 +5,8 @@ def main():
     my_tokenizer = BPETokenizer()
     my_tokenizer.train(dataset_path, vocab_size=2000, frequency_threshold=20)
 
+    print("Base vocab:", my_tokenizer.base_vocab)
+
     print("Final vocabulary size:", len(my_tokenizer.vocab))
 
     print("Vocabulary learned:")
@@ -13,7 +15,7 @@ def main():
     print("Merges:")
     print(my_tokenizer.merges)
 
-    string = "hello world привет"
+    string = "hello world hello world привет"
     result = my_tokenizer.tokenize(string)
     print(f"Original string: {string}")
     print(f"Tokenized string: {result}")
@@ -21,8 +23,8 @@ def main():
     encoded_string = my_tokenizer.encode(result)
     print("Encoded string:", encoded_string)
 
-    decoded_text = my_tokenizer.decode(encoded_string)
-    print("Decoded text:", decoded_text)
+    decoded_string = my_tokenizer.decode(encoded_string)
+    print("Decoded string:", decoded_string)
 
 
 class BPETokenizer:
@@ -43,6 +45,8 @@ class BPETokenizer:
         self.next_token: int = 0
         # ordered list for storing merging rules ('a', 'c')
         self.merges: list[tuple] = list()
+        # base vocab chars for marking unkown chars, see self.vocab
+        self.base_vocab: list[str] = list()
 
     def _initialize_vocab(self, dataset_path):
         """Initialize vocab with individual characters from entire dataset."""
@@ -64,6 +68,9 @@ class BPETokenizer:
             self.vocab[char] = self.next_token
             self.reverse_vocab[self.next_token] = char
             self.next_token += 1
+
+        # fix base_vocab for new text tokenization
+        self.base_vocab = list(self.vocab.keys())
 
     def _prepare_dataset(self, dataset_path):
         """Make list of texts broken into single chars."""
@@ -233,9 +240,19 @@ class BPETokenizer:
 
     def tokenize(self, text: str):
         """Encode input string to token_ids."""
-        # prepare text as a list of chars
-        tokenized_text = list(text)
+        # starting special token
+        tokenized_text = [self.start_string]
+        # add text as a list of chars
+        tokenized_text.extend(list(text))
+        # mark the end of tokenized string
+        tokenized_text.append(self.end_string)
 
+        # substitute unknown chars to self.unknown
+        for i in range(len(tokenized_text)):
+            if tokenized_text[i] not in self.base_vocab:
+                tokenized_text[i] = self.unknown
+
+        # find pairs
         for i in range(len(self.merges)):
             pair = self.merges[i]
             updated_text = list()
@@ -260,9 +277,6 @@ class BPETokenizer:
         """Encode tokenized text."""
         encoded_text = list()
 
-        # start string
-        encoded_text.append(self.vocab[self.start_string])
-
         # encode tokens
         for char_seq in tokenized_text:
             try:
@@ -271,8 +285,6 @@ class BPETokenizer:
             except Exception:
                 encoded_text.append(self.vocab[self.unknown])
 
-        # end string
-        encoded_text.append(self.vocab[self.end_string])
         return encoded_text
 
     def decode(self, encoded_text: list):
