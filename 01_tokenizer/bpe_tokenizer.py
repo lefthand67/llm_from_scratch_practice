@@ -172,13 +172,13 @@ class BPETokenizer:
 
             # find paired tokens' position and populate new text
             idx = 0
-            # -2 because idx starts from 0 + we need idx+1
             while idx < len(text):
                 if idx == len(text) - 1:
                     updated_text.append(text[idx])
                     break
                 if (text[idx], text[idx + 1]) == merge_candidate:
                     updated_text.append(merged_string)
+                    # this one is kicked off
                     idx += 1
                 else:
                     updated_text.append(text[idx])
