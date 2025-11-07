@@ -15,10 +15,20 @@ Let me show you our entire roadmap - think of it as our blueprint for constructi
 | Stage | Focus | Estimated Time | Hands-On Project |
 |-------|-------|----------------|------------------|
 | **1. Foundations & The Tokenizer** | Byte-Pair Encoding, vocabulary trade-offs, text-to-token pipeline | 2 sessions | Build a BPE tokenizer from scratch in Python |
+| **F (added). Neural Networks from Scratch** | Single neuron, backprop, chain rule | 3 sessions | Build everything from numpy arrays up |
 | **2. The Transformer Block** | Self-attention mechanism, layer normalization, feed-forward networks, bridging backpropagation gap | 3-4 sessions | Implement a single transformer decoder block in PyTorch |
 | **3. Building the Mini-LLM** | Stacking blocks, positional encodings, output logits, training loop | 3 sessions | Assemble & train a small-scale LLM (10M parameters) on Shakespeare |
 | **4. Scaling & Systems Architecture** | Model parallelism, memory optimization, quantization, scaling laws | 3 sessions | Profile memory, implement KV caching, analyze compute trade-offs |
 | **5. Alignment** | Supervised Fine-Tuning, RLHF, Direct Preference Optimization | 3 sessions | Implement SFT and simulate reward model training |
+
+| Stage | Focus | Est. Time | Hands-On Project |
+|-------|-------|-----------|-----------------|
+
+| 1. Foundations & Tokenizer | (Completed - you mastered this!) | 2 sessions | BPE tokenizer from scratch |
+| 2. Transformer Block | Self-attention with solid backprop foundation | 3-4 sessions | Implement transformer with full backprop |
+| 3. Mini-LLM Assembly | Stacking blocks, training loop | 3 sessions | Build 10M parameter LLM |
+| 4. Scaling & Systems | Model parallelism, optimization | 3 sessions | Memory profiling & KV caching |
+| 5. Alignment | SFT, RLHF, DPO | 3 sessions | Implement fine-tuning |
 
 ## What You'll Gain Professionally
 
