@@ -16,14 +16,18 @@ def main():
     )
     y = np.array([100, 200, 300, 400], dtype=np.float64)
 
-    my_neuron = Neuron((X.shape))
-    print("my_neuron.input_size:", my_neuron.input_size)
+    my_neuron = Neuron()
+    my_neuron.gradient(X, y)
+
+    # print("my_neuron.input_size:", my_neuron.input_size)
     print("my_neuron.w:", my_neuron.w)
-    print("linear transformation:", my_neuron._get_linear_transformation(X))
-    print("my_neuron.forward(X):", my_neuron.forward(X))
+    print("my_neuron.b:", my_neuron.b)
+    # print("linear transformation:", my_neuron._get_linear_transformation(X))
+    print("linear transformation:", my_neuron.z)
+    print("Activation transformation:", my_neuron.a)
     print(
-        "my_neuron.gradient_of_J(y_true=y, x=X):",
-        my_neuron.gradient_of_J(y_true=y, x=X),
+        "my_neuron.gradient(y_true=y, X=X):",
+        my_neuron.gradient(X=X, y_true=y),
     )
 
 

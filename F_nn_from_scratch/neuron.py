@@ -4,59 +4,65 @@ import numpy as np
 class Neuron:
     """Implement single neuron class."""
 
-    def __init__(self, input_size: tuple) -> None:
+    def __init__(self, alpha: float = 0.01):
         """Initialize neuron entity."""
-        self.input_size = input_size
-        self.w = np.random.default_rng().random(self.input_size[-1])
-        self.b = np.random.default_rng().random()
+        self.w = None
+        self.b = 0.0
+        # linear transformation
+        self.z: np.array = None
+        # activation transformation
+        self.a: np.array = None
         # activation function hyperparameter
-        self.alpha = 0.01
+        self.alpha = alpha
 
-    def leaky_relu(self, vector: np.array) -> np.array:
+    def leaky_relu(self) -> np.ndarray:
         """
         Break linearity.
 
         Parameters
         ----------
-        vector : np.array
+        alpha : float64
             y_pred before activation function applied.
 
         """
-        return np.maximum(self.alpha * vector, vector)
+        return np.maximum(self.alpha * self.z, self.z)
 
-    def derivative_of_leaky_relu(self, vector: np.array) -> np.array:
-        """
-        Calculate the derivative of the activation function.
+    def derivative_of_leaky_relu(self) -> np.array:
+        """Calculate the derivative of the activation function."""
+        return np.where(self.z < 0, self.alpha, 1)
 
-        Parameters
-        ----------
-        vector : np.array
-            y_pred before activation function applied.
-
-        """
-        derivative = np.asarray(vector, copy=True)
-        return np.where(derivative < 0, self.alpha, 1)
-
-    def _get_linear_transformation(self, x: np.array) -> np.array:
-        """
-        Make the matrix multiplication of x and weights.
-
-        The result is y_pred before activation function.
-        """
-        return np.dot(x, self.w) + self.b
-
-    def forward(self, x: np.array) -> np.array:
+    def forward(
+        self, X: np.array, activation_function: str = "leaky_relu"
+    ) -> np.ndarray:
         """Calculate forward pass with activation function."""
-        vector = self._get_linear_transformation(x)
-        return self.leaky_relu(vector)
+        # initialize weights
+        if self.w is None:
+            input_size = X.shape[-1]
+            self.w = np.random.default_rng().random(input_size) * 0.1
 
-    def gradient_of_J(self, y_true: np.array, x: np.array) -> np.array:
-        """Compute the gradient after forward pass."""
-        y_pred = self.forward(x)
-        error = y_pred - y_true
+        # compute linear transformation
+        self.z = np.dot(X, self.w) + self.b
 
-        leaky_relu_derivative = self.derivative_of_leaky_relu(
-            self._get_linear_transformation(x)
-        )
+        # compute activation transformation
+        if activation_function == "leaky_relu":
+            self.a = self.leaky_relu()
+        else:
+            raise ValueError(
+                f"Activation function {activation_function} not implemented (yet)"
+            )
 
-        return np.dot((error * leaky_relu_derivative), x)
+        return self.a
+
+    def gradient(
+        self, X: np.array, y_true: np.array, activation_function: str = "leaky_relu"
+    ) -> np.array:
+        """Gradients for squared error loss: J = (y_pred - y_true)^2."""
+        self.forward(X, activation_function=activation_function)
+        error = self.a - y_true
+
+        leaky_relu_derivative = self.derivative_of_leaky_relu()
+
+        dJ_dw = np.dot((error * leaky_relu_derivative), X)
+        dJ_db = np.sum(error * leaky_relu_derivative)
+
+        return dJ_dw, dJ_db
