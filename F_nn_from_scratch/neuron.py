@@ -24,11 +24,13 @@ class Neuron:
         activation_f: str = "leaky_relu",
     ) -> np.ndarray:
         """Calculate forward pass with activation function."""
-        # initialize weights
+        # Xavier/Glorot weights initialization
         if self.w is None:
             # size of one example
             input_size = X.shape[-1]
-            self.w = np.random.default_rng().random(input_size) + 0.001
+            self.w = (np.random.default_rng().random(input_size) - 0.5) * np.sqrt(
+                2.0 / input_size
+            )
 
         # compute linear transformation
         self.z = np.dot(X, self.w) + self.b
