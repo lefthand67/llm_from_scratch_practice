@@ -10,31 +10,50 @@ I run my mentor in free DeepSeek chat in no reasoning mode (the system prompt is
 
 *"What I cannot create, I do not understand."* - Richard Feynman
 
-Hello! I'm Andrej Karpathy, and I'm excited to be your mentor as we dive deep into "LLMs Under the Hood: From Tokenizer to Alignment." We're going to build a small LLM completely from scratch.
+Welcome. I'm Andrej Karpathy. Let's build a tiny LLM from bare metal.
 
-## Your Complete Learning Journey
+The goal is to systematically construct a 100M parameter language model, focusing on first principles and efficient implementation. This foundation will prepare you for CUDA optimization.
 
-Here's our entire roadmap - save this for reference:
+## Entire Learning Plan
 
-| Stage | Focus | Estimated Time | Hands-On Project |
-|-------|-------|----------------|------------------|
-| **F. Neural Networks from Scratch** | Single neuron, backpropagation, chain rule, multi-layer networks | 3 sessions | Build everything from numpy arrays with complete backprop |
-| **1. Foundations & The Tokenizer** | Byte-Pair Encoding, vocabulary trade-offs, text-to-token pipeline | 2 sessions | Build a BPE tokenizer from scratch in Python |
-| **2. Transformer Block** | Self-attention, layer norm, feed-forward networks, bridging backprop | 3-4 sessions | Implement transformer decoder block in PyTorch |
-| **3. Building Mini-LLM** | Stacking blocks, positional encodings, output logits, training loop | 3 sessions | Assemble 10M parameter LLM, train on Shakespeare |
-| **4. Scaling & Systems Architecture** | Model parallelism, memory optimization, quantization, scaling laws | 3 sessions | Profile memory, implement KV caching, analyze compute trade-offs |
-| **5. Alignment** | SFT, RLHF, DPO - from pretraining to instruction following | 3 sessions | Implement SFT and simulate reward model training |
+| Stage | Focus | Hands-On Goal |
+|-------|-------|---------------|
+| **Phase 1** | Computational Primitives & Gradients | Implement auto-differentiation from scratch |
+| **Phase 2** | Tokenization & Data Engineering | Build custom BPE tokenizer & data loader |
+| **Phase 3** | Transformer Block (Nano-Level) | Implement single transformer block |
+| **Phase 4** | Full LLM Architecture & Training | Train 100M parameter model |
+| **Phase 5** | Alignment & Optimization Preview | Basic finetuning & CUDA concepts |
 
-## Goals & Practical Skills You'll Master
+## Professional Skills Target
+- Deep understanding of LLM mechanics and mathematical operations
+- AI architecture for robust systems
+- Preparation for CUDA optimization
 
-By the end, you'll have deep expertise in:
-- **Mathematical foundations** for deep learning (backprop, chain rule, gradient flow)
-- **Implementing core algorithms** from first principles
-- **Debugging gradient computations** and complex ML systems
-- **Designing scalable AI training infrastructure**
-- **Profiling and optimizing** model performance
-- **Making architectural trade-offs** based on scaling laws
+## Administrative Setup
+- Session duration: 1 hour daily
+- Hardware: NVIDIA RTX 4090ti 16GB VRAM, Fedora 42
+- Software: PyTorch/JAX implementation focus.
 
-## Session Logistics
+Good question. Let's analyze the hardware requirements systematically.
 
-We'll work in focused 1-hour evening sessions, each with clear objectives and hands-on coding.
+## Can I run this course on the weaker laptop?
+
+**Hardware Requirements Analysis:**
+
+| Component | RTX 4090ti | Weaker Laptop | Impact |
+|-----------|------------|---------------|---------|
+| **VRAM** | 16GB | Shared system RAM (8GB total) | Limits model size and batch size |
+| **Compute** | High parallel throughput | Limited CPU cores | Slower training times |
+| **Memory Bandwidth** | ~1 TB/s | ~50 GB/s | Significant bottleneck for matrix ops |
+| **Practical Limits** | 100M param model feasible | ~10M param model maximum | Scales final project scope |
+
+If you proceed with the weaker laptop, we'll need to adjust:
+
+1. **Phase 1-3**: Completely feasible - these are algorithmic implementations
+2. **Phase 4**: We'll target a smaller model (~10M parameters vs 100M)
+3. **Training Time**: Expect 10-50x slower execution
+4. **Batch Size**: Will need to be minimal (possibly 1)
+
+The core concepts of computational graphs, backpropagation, and transformer mechanics remain identical. The implementation principles for CUDA optimization still apply - we just won't be able to run the full-scale final project.
+
+The mathematical understanding and architectural insights are what matter for your CUDA preparation, not the absolute scale.
